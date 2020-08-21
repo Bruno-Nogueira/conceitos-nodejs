@@ -3,12 +3,26 @@ const cors = require("cors");
 
 const { v4: uuid } = require('uuid');
 
+// const { isUuid } = require('uuidv4')
+
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
 const repositories = [];
+
+/*function validateRepositoryId(request, response, next) {
+  const { id } = request.params
+
+  if (!isUuid(id)) {
+      return response.status(400).json({ error: 'Invalid Repository ID.'}) // 
+  }
+
+  return next()
+}
+
+app.use('/repositories/:id', validateRepositoryId)*/
 
 app.get("/repositories", (request, response) => {
   return response.json(repositories)
@@ -30,24 +44,42 @@ app.post("/repositories", (request, response) => {
   return response.json(repository)
 });
 
-app.put("/repositories/:id", (request, response) => { // feito por mim
+app.put("/repositories/:id", (request, response) => { 
   const { id } = request.params
 
-  const { title, url, techs} = request.body
+  const { title, url, techs } = request.body
 
   const indice = repositories.findIndex(repository => repository.id === id)
 
-  repositories[indice] = {
+  if (indice < 0) {
+    return response.status(400).json({ error: 'Repository not found.' })
+  }
+
+  const repository = {
+    id,
     title,
     url,
-    techs
+    techs,
+    likes
   }
+
+  repositories[indice] = repository
 
   return response.json(repositories[indice])
 });
 
-app.delete("/repositories/:id", (request, response) => {
-  // TODO
+app.delete("/repositories/:id", (request, response) => { 
+  const { id } = request.params
+
+  const indice = repositories.findIndex(repository => repository.id === id)
+
+  if (indice < 0) {
+    return response.status(400).json({ error: 'Repository not found.' })
+  }
+
+  repositories.splice(indice, 1)
+
+  return response.status(204).send()
 });
 
 app.post("/repositories/:id/like", (request, response) => {
