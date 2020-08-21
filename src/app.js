@@ -30,8 +30,20 @@ app.post("/repositories", (request, response) => {
   return response.json(repository)
 });
 
-app.put("/repositories/:id", (request, response) => {
-  // TODO
+app.put("/repositories/:id", (request, response) => { // feito por mim
+  const { id } = request.params
+
+  const { title, url, techs} = request.body
+
+  const indice = repositories.findIndex(repository => repository.id === id)
+
+  repositories[indice] = {
+    title,
+    url,
+    techs
+  }
+
+  return response.json(repositories[indice])
 });
 
 app.delete("/repositories/:id", (request, response) => {
